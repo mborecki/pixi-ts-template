@@ -1,6 +1,6 @@
 {
   "frames": {
-    "button": {
+    "button/normal": {
       "frame": {
         "x": 2,
         "y": 2,
@@ -24,7 +24,7 @@
         "y": 0.5
       }
     },
-    "button-clicked": {
+    "button/clicked": {
       "frame": {
         "x": 2,
         "y": 56,

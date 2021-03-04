@@ -20,11 +20,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */   "default": () => (/* binding */ App)
 /* harmony export */ });
 /* harmony import */ var pixi_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
+/* harmony import */ var _utils_load_sprites__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(55);
+
 
 class App extends pixi_js__WEBPACK_IMPORTED_MODULE_0__.Application {
     constructor() {
         super({
             backgroundColor: 0xe6db88
+        });
+        (0,_utils_load_sprites__WEBPACK_IMPORTED_MODULE_1__.default)(this, [
+            ['sprites', '/dist/assets/sprites.json']
+        ]).then(() => {
+            const button = pixi_js__WEBPACK_IMPORTED_MODULE_0__.Sprite.from('button/normal');
+            button.interactive = true;
+            this.stage.addChild(button);
+            button.on('click', () => {
+                button.texture = pixi_js__WEBPACK_IMPORTED_MODULE_0__.Texture.from('button/clicked');
+            });
         });
     }
 }
@@ -43751,6 +43763,30 @@ var AnimatedSprite = /** @class */ (function (_super) {
 
 
 //# sourceMappingURL=sprite-animated.js.map
+
+
+/***/ }),
+/* 55 */
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ loadSprites)
+/* harmony export */ });
+function loadSprites(app, sprites) {
+    return new Promise(resolve => {
+        sprites.forEach(assetInfo => {
+            app.loader.add(...assetInfo);
+        });
+        app.loader.load(() => {
+            resolve();
+        });
+        app.loader.onError.add((...args) => {
+            console.error(...args);
+        });
+    });
+}
 
 
 /***/ })
