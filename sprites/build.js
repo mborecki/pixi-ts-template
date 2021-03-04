@@ -43,8 +43,6 @@ spritesheets.forEach(ss => {
             console.error('Packaging failed', error);
         } else {
             for (let item of files) {
-                console.log(item.name);
-                console.log({baseOutput, o: ss.outPath}, Path.join(baseOutput, ss.outPath))
                 fs.mkdirSync(Path.join(baseOutput, ss.outPath), { recursive: true })
                 fs.writeFileSync(Path.join(baseOutput, ss.outPath, item.name), item.buffer)
             }
