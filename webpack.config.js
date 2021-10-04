@@ -1,39 +1,62 @@
-const Path = require('path');
-const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const env = process.env.NODE_ENV
 
-module.exports = function (env = {}) {
-    const entry = './src/index.ts';
-    const output = {
-        filename: 'lib.js',
-        path: Path.join(__dirname, 'dist'),
-        library: "PixiDemo",
-        libraryTarget: "umd"
-    };
-    const rules = [
-        {
-            test: /\.ts$/,
-            exclude: [
-                /\.(test|spec)\./
-            ],
-            loader: 'ts-loader',
-            options: {
-                compilerOptions: {}
+var path = require('path')
+const { TsConfigPathsPlugin } = require('awesome-typescript-loader');
+
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+
+module.exports = {
+    mode: env || 'development',
+    devtool: 'source-map',
+
+    entry: {
+        app: [
+            path.resolve(__dirname, 'src/index.ts')
+        ]
+    },
+    // devtool: 'cheap-source-map',
+    output: {
+        path: path.resolve(__dirname, 'build'),
+        filename: 'bundle.js',
+        clean: true
+    },
+
+    resolve: {
+        extensions: ['.ts', '.js'],
+        plugins: [
+            new TsConfigPathsPlugin()
+        ]
+    },
+
+    plugins: [
+        new HtmlWebpackPlugin({
+            filename: `index.html`,
+            template: path.join(__dirname, 'src/', `index.html`)
+        }),
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: './assets',
+                    to: 'assets'
+                }
+            ]
+        })
+    ],
+
+    module: {
+
+        rules: [
+            {
+                test: /\.ts$/,
+                loader: 'awesome-typescript-loader'
             }
-        }
-    ];
+        ]
+    },
 
-
-    return {
-        mode: 'none',
-        entry,
-        output,
-        module: {
-            rules
-        },
-        resolve: {
-            plugins: [new TsconfigPathsPlugin({})],
-            extensions: ['.ts', '.js', '.json']
-        }
+    devServer: {
+        // contentBase: path.join(__dirname, 'dist'),
+        compress: true,
+        port: 9000
     }
-
-}
+};

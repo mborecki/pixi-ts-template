@@ -1,11 +1,10 @@
 import App from './app';
 
-function init(container: HTMLCanvasElement) {
-    const app = new App();
-
-    container.appendChild(app.view);
+function init() {
+    const app = new App({
+        assetsPath: 'assets/'
+    });
+    document.body.appendChild(app.view);
 }
 
-export {
-    init
-}
+init();
