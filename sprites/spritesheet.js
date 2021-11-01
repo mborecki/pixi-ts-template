@@ -4,27 +4,28 @@ let Path = require("path");
 // https://www.npmjs.com/package/free-tex-packer-core
 let texturePacker = require("free-tex-packer-core");
 
-const spritesheets = [
-    {
-        outputPath: './assets/generated/',
-        filename: '_ph',
-        sprites: [
-            { name: 'test', path: './sprites/test.jpg' },
-            { name: 'dot', path: './sprites/dot.jpg' },
-        ]
-    }
-];
+const imagemin = import('imagemin');
+const imageminPngquant = require('imagemin-pngquant');
 
-spritesheets.forEach(ss => {
-    const images = ss.sprites.map((s) => {
+const config = require('./spritesheets.config')();
+
+config.forEach(sheetConfig => {
+
+    const inputBase = sheetConfig.inputBase || '';
+    const namePrefix = sheetConfig.namePrefix || '';
+    const filename = sheetConfig.filename;
+    const outputPath = sheetConfig.outputPath;
+    const sprites = sheetConfig.sprites;
+
+    const images = sprites.map((s) => {
         return {
-            path: s.name,
-            contents: fs.readFileSync(s.path)
+            path: namePrefix + s.name,
+            contents: fs.readFileSync(Path.join(inputBase, s.path))
         }
     });
     texturePacker(images, {
         exporter: 'PIXI',
-        textureName: ss.filename,
+        textureName: filename,
         packer: 'OptimalPacker',
         padding: 2,
         width: 2048,
@@ -37,8 +38,15 @@ spritesheets.forEach(ss => {
         } else {
             for (let item of files) {
                 console.log(item.name);
-                fs.mkdirSync(ss.outputPath, { recursive: true })
-                fs.writeFileSync(Path.join(ss.outputPath, item.name), item.buffer)
+                fs.mkdirSync(outputPath, { recursive: true })
+
+                imagemin.then((min) => {
+                    min.default.buffer(item.buffer, {
+                        plugins: [imageminPngquant()]
+                    }).then((data) => {
+                        fs.writeFileSync(Path.join(outputPath, item.name), data)
+                    });
+                })
             }
         }
     })

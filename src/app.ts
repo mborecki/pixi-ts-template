@@ -16,18 +16,17 @@ export default class App extends PIXI.Application {
         });
 
         loadSprites(this, [
-            ['_ph', `${this.config.assetsPath}generated/_ph.json`]
+            ['sprites', `${this.config.assetsPath}/generated/sprites.json`]
         ]).then(() => {
 
 
-            const button = PIXI.Sprite.from('test');
+            const button = PIXI.Sprite.from('template_test');
 
             button.interactive = true;
 
             this.stage.addChild(button);
 
             button.on('click', async () => {
-                button.texture = PIXI.Texture.from('test');
                 const audio = await this.audio;
                 audio.play('blip');
             })

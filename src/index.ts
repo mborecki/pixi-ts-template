@@ -2,7 +2,7 @@ import App from './app';
 
 function init() {
     const app = new App({
-        assetsPath: 'assets/'
+        assetsPath: 'assets'
     });
     document.body.appendChild(app.view);
 }
