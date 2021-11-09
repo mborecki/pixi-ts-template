@@ -2,6 +2,7 @@ import * as PIXI from 'pixi.js';
 import AppStage from './stage';
 import getAudioPlayer from './utils/audio';
 import loadSprites from './utils/load-sprites';
+import spritesIndex from './sprites-index.json';
 
 type AppConfig = {
     assetsPath: string,
@@ -29,9 +30,11 @@ export default class App extends PIXI.Application {
 
 
         Promise.all([
-            loadSprites(this, [
-                ['sprites', `${this.config.assetsPath}/generated/sprites.json`]
-            ]),
+            loadSprites(this,
+                spritesIndex.map((file, index) => {
+                    return [`spritesheet_${index}`, `${this.config.assetsPath}/generated/${file}`]
+                })
+            ),
             getAudioPlayer()
         ]).then(() => {
 

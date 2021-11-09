@@ -9,7 +9,11 @@ const imageminPngquant = require('imagemin-pngquant');
 
 const config = require('./spritesheets.config')();
 
-config.forEach(sheetConfig => {
+const fileNames = [];
+
+const { baseOutputPath, baseInputPath } = config;
+
+const packingPromises = config.files.map(sheetConfig => {
 
     const inputBase = sheetConfig.inputBase || '';
     const namePrefix = sheetConfig.namePrefix || '';
@@ -20,34 +24,48 @@ config.forEach(sheetConfig => {
     const images = sprites.map((s) => {
         return {
             path: namePrefix + s.name,
-            contents: fs.readFileSync(Path.join(inputBase, s.path))
+            contents: fs.readFileSync(Path.join(baseInputPath, inputBase, s.path))
         }
     });
-    texturePacker(images, {
-        exporter: 'PIXI',
-        textureName: filename,
-        packer: 'OptimalPacker',
-        padding: 2,
-        width: 2048,
-        height: 2048,
-        allowRotation: false, // Phaser3 nie obsługuje rotacji
-        allowTrim: false
-    }, (files, error) => {
-        if (error) {
-            console.error('Packaging failed', error);
-        } else {
-            for (let item of files) {
-                console.log(item.name);
-                fs.mkdirSync(outputPath, { recursive: true })
+    return new Promise((resolve, reject) => {
+        texturePacker(images, {
+            exporter: 'PIXI',
+            textureName: filename,
+            packer: 'OptimalPacker',
+            padding: 2,
+            width: 2048,
+            height: 2048,
+            allowRotation: false, // Phaser3 nie obsługuje rotacji
+            allowTrim: false
+        }, (files, error) => {
+            if (error) {
+                console.error('Packaging failed', error);
+                reject(error);
+            } else {
+                for (let item of files) {
+                    console.log(item.name);
+                    fs.mkdirSync(Path.join(baseOutputPath, outputPath), { recursive: true })
 
-                imagemin.then((min) => {
-                    min.default.buffer(item.buffer, {
-                        plugins: [imageminPngquant()]
-                    }).then((data) => {
-                        fs.writeFileSync(Path.join(outputPath, item.name), data)
-                    });
-                })
+                    if (/\.json$/.test(item.name)) {
+                        fileNames.push(Path.join(outputPath, item.name));
+                    }
+
+                    imagemin.then((min) => {
+                        min.default.buffer(item.buffer, {
+                            plugins: [imageminPngquant()]
+                        }).then((data) => {
+                            fs.writeFileSync(Path.join(baseOutputPath, outputPath, item.name), data)
+                            resolve();
+                        });
+                    })
+                }
             }
-        }
+        })
     })
 });
+
+Promise.all(packingPromises)
+    .then(() => {
+        console.log(fileNames);
+        fs.writeFileSync(Path.join('./src/sprites-index.json'), JSON.stringify(fileNames));
+    })
