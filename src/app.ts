@@ -25,8 +25,6 @@ export default class App extends PIXI.Application {
 
         this.ticker.add(preloaderAnimation)
 
-        // const preloader = PIXI.Sprite.from(`${this.config.assetsPath}/preloader.png`);
-
         this.stage.addChild(preloader);
 
 
