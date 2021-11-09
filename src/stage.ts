@@ -18,5 +18,9 @@ export default class AppStage extends PIXI.Container {
             const audio = await this.audio;
             audio.play('blip');
         })
+
+        app.ticker.add(() => {
+            button.position.set(100 + Math.cos(Date.now() / 1000) * 100, 100 + Math.sin(Date.now() / 1000) * 100);
+        })
     }
 }
