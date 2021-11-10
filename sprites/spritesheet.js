@@ -1,5 +1,6 @@
 const fs = require('fs');
 let Path = require("path");
+const crypto = require("crypto");
 
 // https://www.npmjs.com/package/free-tex-packer-core
 let texturePacker = require("free-tex-packer-core");
@@ -9,7 +10,8 @@ const imageminPngquant = require('imagemin-pngquant');
 
 const config = require('./spritesheets.config')();
 
-const fileNames = [];
+const fileNames = new Set();
+const JSONFilesWithHash = new Set();
 
 const { baseOutputPath, baseInputPath } = config;
 
@@ -35,30 +37,32 @@ const packingPromises = config.files.map(sheetConfig => {
             padding: 2,
             width: 2048,
             height: 2048,
-            allowRotation: false, // Phaser3 nie obsługuje rotacji
+            detectIdentical: false,
+            allowRotation: false,
             allowTrim: false
         }, (files, error) => {
             if (error) {
                 console.error('Packaging failed', error);
                 reject(error);
             } else {
-                for (let item of files) {
-                    console.log(item.name);
+
+                resolve(Promise.all(files.map(item => {
                     fs.mkdirSync(Path.join(baseOutputPath, outputPath), { recursive: true })
 
-                    if (/\.json$/.test(item.name)) {
-                        fileNames.push(Path.join(outputPath, item.name));
-                    }
-
-                    imagemin.then((min) => {
-                        min.default.buffer(item.buffer, {
+                    return imagemin.then((min) => {
+                        return min.default.buffer(item.buffer, {
                             plugins: [imageminPngquant()]
                         }).then((data) => {
-                            fs.writeFileSync(Path.join(baseOutputPath, outputPath, item.name), data)
-                            resolve();
-                        });
+                            fileNames.add(Path.join(outputPath, item.name.replace(/\.[^/.]+$/, "")));
+
+                            return fs.promises.writeFile(Path.join(baseOutputPath, outputPath, item.name), data)
+                        }).catch(error => {
+                            console.log(error);
+                        })
                     })
-                }
+                })).then((x) => {
+                    console.log('Spritesheet generated:', filename);
+                }))
             }
         })
     })
@@ -66,6 +70,32 @@ const packingPromises = config.files.map(sheetConfig => {
 
 Promise.all(packingPromises)
     .then(() => {
-        console.log(fileNames);
-        fs.writeFileSync(Path.join('./src/sprites-index.json'), JSON.stringify(fileNames));
+
+        fileNames.forEach(filename => {
+
+            const PNGFile = Path.join(baseOutputPath, filename + '.png');
+            const JSONFile = Path.join(baseOutputPath, filename + '.json');
+
+            const png = fs.readFileSync(PNGFile);
+            const json = JSON.parse(fs.readFileSync(JSONFile));
+
+            const hash = crypto.createHash('md5').update(png).digest('hex');
+
+            json.meta.image = json.meta.image.replace(/\.png$/, `.${hash}.png`)
+            fs.writeFileSync(JSONFile, JSON.stringify(json, null, 4))
+
+
+            const newJSONfile = `${filename}.${hash}.json`;
+            const newPNGfile = `${filename}.${hash}.png`;
+
+
+            fs.renameSync(Path.join(baseOutputPath, filename + '.png'), Path.join(baseOutputPath, newPNGfile));
+            fs.renameSync(Path.join(baseOutputPath, filename + '.json'), Path.join(baseOutputPath, newJSONfile));
+
+            JSONFilesWithHash.add(newJSONfile)
+        })
+
+        console.log('Spritesheet list', Array.from(JSONFilesWithHash));
+
+        fs.writeFileSync(Path.join('./src/sprites-index.json'), JSON.stringify(Array.from(JSONFilesWithHash)));
     })

@@ -6,7 +6,7 @@ module.exports = () => {
             {
                 inputBase: '',
 
-                outputPath: '',
+                outputPath: 'sprites/',
                 namePrefix: 'template_',
                 filename: 'sprites',
 
