@@ -13,7 +13,7 @@ Download from https://www.ffmpeg.org/download.html
 ## Commands
 
 * `yarn build` - builds project
-* `yarn start` - starts dev server
+* `yarn start` - starts dev server - http://localhost:9000/
 * `yarn sprites` - builds spritesheets
 * `yarn audio` - builds audioalbum
 

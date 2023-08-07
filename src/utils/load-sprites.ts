@@ -1,18 +1,20 @@
-import * as PIXI from 'pixi.js';
+import { Assets } from 'pixi.js';
 
-export default function loadSprites(app: PIXI.Application, sprites: [string, string][]): Promise<void> {
-    return new Promise(resolve => {
-        sprites.forEach(assetInfo => {
-            app.loader.add(...assetInfo);
-        })
+export default async function loadSprites(sprites: [string, string][]): Promise<void> {
+    Assets.init();
 
-        app.loader.load(() => {
-            resolve();
-        })
-
-        app.loader.onError.add((...args: any[]) => {
-            console.error(...args);
-        })
-
+    sprites.forEach(assetInfo => {
+        Assets.add(...assetInfo);
     })
+
+    await Promise.allSettled(sprites.map(async (s) => {
+
+        try {
+            // debugger;
+            await Assets.load(s[0]);
+        } catch(e) {
+            console.error(e);
+        }
+        })
+    )
 }

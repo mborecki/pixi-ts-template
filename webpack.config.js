@@ -1,7 +1,6 @@
 const env = process.env.NODE_ENV
 
 var path = require('path')
-const { TsConfigPathsPlugin } = require('awesome-typescript-loader');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -24,9 +23,6 @@ module.exports = {
 
     resolve: {
         extensions: ['.ts', '.js'],
-        plugins: [
-            new TsConfigPathsPlugin()
-        ]
     },
 
     plugins: [
@@ -49,7 +45,7 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
-                loader: 'awesome-typescript-loader'
+                loader: 'ts-loader'
             }
         ]
     },

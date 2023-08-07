@@ -30,7 +30,7 @@ export default class App extends PIXI.Application {
 
 
         Promise.all([
-            loadSprites(this,
+            loadSprites(
                 spritesIndex.map((file, index) => {
                     return [`spritesheet_${index}`, `${this.config.assetsPath}/generated/${file}`]
                 })

@@ -10,7 +10,7 @@ export default class AppStage extends PIXI.Container {
         const button = PIXI.Sprite.from('template_test');
 
         button.interactive = true;
-        button.buttonMode = true;
+        button.cursor = 'pointer';
 
         this.addChild(button);
 
